@@ -13,7 +13,7 @@
 %     computeCost.m
 %     gradientDescentMulti.m
 %     computeCostMulti.m
-%     featureNormalize.m
+%       featureNormalize.m
 %     normalEqn.m
 %
 %  For this exercise, you will not need to change any code in this file,

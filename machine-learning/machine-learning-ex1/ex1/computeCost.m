@@ -13,10 +13,7 @@ J = 0;
 % Instructions: Compute the cost of a particular choice of theta
 %               You should set J to the cost.
 
-fprintf("\nsize(X) = %d %d\n", size(X)(1), size(X)(2))
-fprintf("\nsize(theta) = %d %d\n", size(theta)(1), size(theta)(2))
-
-J = 1/(2 * m) * sum(X*theta - y)
+J = (1/(2 * m)) * sum((X*theta - y).^2);
 
 % =========================================================================
 
