@@ -1,4 +1,4 @@
-function [J grad] = nnCostFunction(nn_params, ...
+function [J, grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
                                    hidden_layer_size, ...
                                    num_labels, ...
@@ -62,25 +62,61 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+mapped_y = zeros(size(y,1),num_labels);
+for i = 1:numel(y)
+    mapped_y(i, y(i)) = 1;
+end
+
+theta_1_rolled_out_length = (input_layer_size + 1)* hidden_layer_size;
+theta_1 = reshape(nn_params(1:theta_1_rolled_out_length), hidden_layer_size, input_layer_size + 1);
 
 
+theta_2_rolled_out_length = (hidden_layer_size + 1)* num_labels;
+theta_2_rolled_out_end_position = theta_2_rolled_out_length + theta_1_rolled_out_length;
+theta_2 = reshape(nn_params(theta_1_rolled_out_length + 1 : theta_2_rolled_out_end_position), num_labels, hidden_layer_size + 1);
 
 
+a_2_input = [ones(size(X, 1), 1), X];
+z_2 = a_2_input * theta_1';
+a_2 = sigmoid(z_2);
 
+a_3_input = [ones(size(a_2, 1), 1), a_2];
+z_3 = a_3_input * theta_2';
+a_3 = sigmoid(z_3);
+a_3_positive_term = log(a_3).* mapped_y;
+a_3_negative_term = log(1 - a_3) .* (1 - mapped_y);
 
+J = (1/m) * sum(sum(-a_3_positive_term - a_3_negative_term));
 
+temp_theta_1 = theta_1;
+temp_theta_1(:, 1) = 0;
+temp_theta_2 = theta_2;
+temp_theta_2(:, 1) = 0;
+regularization_term = lambda/(2*m) *( sum(sum(temp_theta_1.^2)) + sum(sum(temp_theta_2.^2)));
 
+J = J + regularization_term;
 
+% ----------------  Calculate Gradients -----------------------------------
 
+big_delta_1 = zeros(size(theta_1, 1), size(theta_1, 2));
+big_delta_2 = zeros(size(theta_2, 1), size(theta_2, 2));
 
+for i = 1:size(X, 1)
+    back_prop_a_2_input = a_2_input(i, :);
+    back_prop_a_3_input = a_3_input(i, :);
+    
+    back_prop_a_3 = a_3(i, :);
+    delta_3 = back_prop_a_3 - mapped_y(i, :);
+    
+    back_prop_z_2 = [1, z_2(i,:)];
+    delta_2 = (delta_3*theta_2).*sigmoidGradient(back_prop_z_2);
+    
+    big_delta_1 = big_delta_1 + delta_2(2:end)'*(back_prop_a_2_input);
+    big_delta_2 = big_delta_2 + delta_3'*(back_prop_a_3_input);
+end
 
-
-
-
-
-
-
-% -------------------------------------------------------------
+Theta1_grad = (1/m)*big_delta_1 + (lambda/m)*temp_theta_1;
+Theta2_grad = (1/m)*big_delta_2 + (lambda/m)*temp_theta_2;
 
 % =========================================================================
 
