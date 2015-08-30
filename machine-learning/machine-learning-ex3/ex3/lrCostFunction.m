@@ -36,14 +36,20 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
+tempTheta = theta;
+tempTheta(1) = 0;
+tempThetaSquared = tempTheta.^2;
+lambdaTerm = (lambda/(2*m))*sum(tempThetaSquared);
+gradLambdaTerm = lambda/m * tempTheta;
+XTheta = X*theta;
+sigmoided = sigmoid(XTheta);
 
+positiveTerm = y.*log(sigmoided);
+negativeTerm = (1-y).*log(1-sigmoided);
 
+J = 1/m * sum(- positiveTerm - negativeTerm) + lambdaTerm;
 
-
-
-
-
-
+grad = (1/m * (sigmoided - y)'*X)' + gradLambdaTerm;
 
 % =============================================================
 
